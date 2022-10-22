@@ -11,6 +11,7 @@
 - transaction with tezos-cli
 - counter example
   `ligo compile contract counter.mligo > output.tz`
+  `ligo compile storage counter.mligo "{counter = 0n}"`
 
 ## MVP:
 - read the TZIP-12
