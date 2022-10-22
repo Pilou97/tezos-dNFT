@@ -6,6 +6,7 @@
    - https://gitlab.com/tezos/flextesa
    - script: kathmandou
 - install tezos-cli
+   - https://opentezos.com/tezos-basics/cli-and-rpc/
 - install ligo with docker
 - transaction with tezos-cli
 - counter example
