@@ -47,3 +47,4 @@
      - another example based on a real life asset
 
  - implement FA1.2
+ - event ?
