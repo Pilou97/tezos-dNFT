@@ -1,0 +1,9 @@
+services:
+  flextesa:
+    container_name: flextesa
+    image: oxheadalpha/flextesa:latest
+    environment:
+      block_time: 2
+    command: kathmandubox start
+    ports:
+      - 20000:20000
