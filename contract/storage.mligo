@@ -1,7 +1,9 @@
+#import "error.mligo" "Error"
+
+
 type ledger = (nat, address) big_map
 
 type operators = ((address * nat), (address set)) big_map
-
 
 type t = {
     ledger: ledger;
@@ -12,10 +14,10 @@ type t = {
 let transfer (from: address) (to: address) (token_id: nat) (ledger: ledger) =
     let address = Big_map.find_opt token_id ledger in
     match address with
-        | None -> failwith "Token not found"
+        | None -> failwith Error.fa2_insufficient_balance
         | Some owner -> if owner = from 
             then Big_map.update token_id (Some to) ledger
-            else failwith "From is not the owner of the token"
+            else failwith Error.fa2_not_owner
 
 let get_balance (holder: address) (token_id: nat) (ledger: ledger) = 
     match Big_map.find_opt token_id ledger with
