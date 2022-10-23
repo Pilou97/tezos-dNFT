@@ -22,13 +22,13 @@ type transfer = transfer_from list
 let handle_transfers (transfer: transfer) (storage: storage) : operation list * storage = 
     let handle_transfer (storage, transfer_from) =
         let {from_; txs} = transfer_from in 
-        let {ledger; token_ids} = storage in
+        let {ledger; token_ids; operators} = storage in
         let transfer_one_token (ledger, tx) = 
             let {to_; token_id; amount=_} = tx in
             Storage.transfer from_ to_ token_id ledger
         in
         let ledger = List.fold_left transfer_one_token ledger txs in
-        {ledger; token_ids}
+        {ledger; token_ids; operators}
     in
     let storage = List.fold_left handle_transfer storage transfer in
     ([], storage)
@@ -60,13 +60,30 @@ let handle_balance_of (balance_of: balance_of) (storage: storage): operation lis
     let operation = Tezos.transaction responses 0tez callback in
     ([operation], storage)
 
+// Update operators
 
+type operator = [@layout:comb]
+{
+    owner: address;
+    operator: address;
+    token_id: nat
+}
 
-type update_operators = unit
+type update_operator =
+    | Add_operator of operator
+    | Remove_operator of operator
+
+type update_operators = update_operator list
 
 let handle_update_operators (update_operators: update_operators) (storage: storage): operation list * storage = 
-    let operations: operation list = [] in
-    (operations, storage)
+    let {ledger; token_ids; operators} = storage in
+    let update_operator (operators, operation) = match operation with
+        | Add_operator {owner; operator; token_id} -> Storage.add_operator owner operator token_id operators
+        | Remove_operator {owner; operator; token_id} -> Storage.remove_operator owner operator token_id operators
+    in
+    let operators = List.fold_left update_operator operators update_operators in
+    let storage = {ledger; token_ids; operators} in
+    ([], storage)
 
 type parameters = 
     | Transfer of transfer
