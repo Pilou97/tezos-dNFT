@@ -33,11 +33,33 @@ let handle_transfers (transfer: transfer) (storage: storage) : operation list * 
     let storage = List.fold_left handle_transfer storage transfer in
     ([], storage)
 
-type balance_of = unit
+// Balance of
+
+type request = {
+    owner: address;
+    token_id: nat;
+}
+
+type response = [@layout:comb] {
+    request: request;
+    balance: nat;
+}
+
+type balance_of = [@layout:comb] {
+    requests: request list;
+    callback: response list contract;
+}
 
 let handle_balance_of (balance_of: balance_of) (storage: storage): operation list * storage = 
-    let operations: operation list = [] in
-    (operations, storage)
+    let {requests; callback} = balance_of in
+    let responses = List.map (fun request ->
+        let {owner; token_id} = request in
+        let balance = Storage.get_balance owner token_id storage.ledger in
+        {request; balance}
+    ) requests in
+    let operation = Tezos.transaction responses 0tez callback in
+    ([operation], storage)
+
 
 
 type update_operators = unit
