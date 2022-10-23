@@ -47,7 +47,6 @@
  - Add a second entrypoint to the contract:
      - update-meta-operators: so that several addresses can update the metadata of an NFT
      - another example based on a real life asset
-
  - implement FA1.2
  - event ?
 
@@ -55,7 +54,7 @@
 TODO: add description of the project, quote the bounty
 
 ## Requirements:
- - ligo 0.54.1 
+ - ligo 0.54.1
  - tezos-client (tested with 4ca33194)
 
 ## How to compile:

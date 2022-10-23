@@ -1,0 +1,6 @@
+{
+    "tezosEndpoint": "http://localhost:20000",
+    "blockTime": 3000,
+    "signer": "edsk3QoqBuvdamxouPhin7swCvkQNgq4jP5KZPbwWNnwdZpSpJiEbq",
+    "contract": "KT1SB5PBHDsanLWZTrdDgDJTHZFG9SGKu9Jk"
+}

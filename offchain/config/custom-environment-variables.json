@@ -1,0 +1,9 @@
+{
+    "tezosEndpoint": "TEZOS_ENDPOINT",
+    "blockTime": {
+        "__name": "BLOCK_TIME",
+        "__format": "number"
+    },
+    "signer": "SIGNER",
+    "contract": "CONTRACT"
+}
