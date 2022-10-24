@@ -1,14 +1,18 @@
 #import "error.mligo" "Error"
 
-
 type ledger = (nat, address) big_map
 
 type operators = ((address * nat), (address set)) big_map
 
+type metadata = {
+    token_id: nat;
+    token_info: (string, bytes) map
+}
+
 type t = {
     ledger: ledger;
-    token_ids: nat list;
     operators: operators;
+    token_metadata: (nat, metadata) big_map;
 }
 
 let transfer (from: address) (to: address) (token_id: nat) (ledger: ledger) =
@@ -50,3 +54,9 @@ let is_operator (operator: address) (owner: address) (token_id: nat) (operators:
         | None -> false
         | Some operators -> Set.mem operator operators
 
+let get_token (token_id: nat) (storage: t) = Big_map.find_opt token_id storage.token_metadata
+
+let update_token (token_id: nat) (metadata: metadata) (storage: t) = 
+    let {ledger; operators; token_metadata} = storage in
+    let token_metadata = Big_map.update token_id (Some metadata) token_metadata in
+    {ledger; operators; token_metadata}

@@ -10,3 +10,6 @@ let fa2_receiver_hook_failed = "FA2_RECEIVER_HOOK_FAILED"
 let fa2_sender_hook_failed = "FA2_SENDER_HOOK_FAILED"
 let fa2_receiver_hook_undefined = "FA2_RECEIVER_HOOK_UNDEFINED"
 let fa2_sender_hook_undefined = "FA2_SENDER_HOOK_UNDEFINED"
+
+// Custom error
+let fa2_reserved_metadata_field = "FA2_RESERVED_METADATA_FIELD"
