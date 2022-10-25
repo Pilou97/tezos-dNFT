@@ -86,9 +86,14 @@ module Update_operators = struct
 
     let transition (update_operators: update_operators) (storage: Storage.t): return = 
         let {ledger; operators; token_metadata} = storage in
+        let sender = Tezos.get_sender () in
         let update_operator (operators, operation) = match operation with
-            | Add_operator {owner; operator; token_id} -> Storage.add_operator owner operator token_id operators
-            | Remove_operator {owner; operator; token_id} -> Storage.remove_operator owner operator token_id operators
+            | Add_operator {owner; operator; token_id} -> 
+                let () = if owner = sender then () else failwith Error.fa2_not_owner in  
+                Storage.add_operator owner operator token_id operators
+            | Remove_operator {owner; operator; token_id} -> 
+                let () = if owner = sender then () else failwith Error.fa2_not_owner in  
+                Storage.remove_operator owner operator token_id operators
         in
         let operators = List.fold_left update_operator operators update_operators in
         let storage = {ledger; operators; token_metadata} in
