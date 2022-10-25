@@ -20,18 +20,22 @@ module Transfer = struct
 
     type t = transfer
 
-    let transition (transfer: transfer) (storage: Storage.t): return = 
-        let handle_transfer (storage, transfer_from) =
-            let {from_; txs} = transfer_from in 
-            let {ledger; operators; token_metadata } = storage in
-            let transfer_one_token (ledger, tx) = 
-                let {to_; token_id; amount=_} = tx in
-                Storage.transfer from_ to_ token_id ledger
-            in
-            let ledger = List.fold_left transfer_one_token ledger txs in
-            {ledger; operators; token_metadata}
+    let transfer_from  (storage, {from_; txs}) =
+        let {ledger; operators; token_metadata } = storage in
+        let sender = Tezos.get_sender () in
+        let transfer_one_token (ledger, {to_; token_id; amount}) = 
+            let () = Storage.assert_token_defined token_id storage in
+            let () = Storage.assert_can_transfer_token sender from_ token_id storage in
+            let () = Storage.assert_sufficient_balance amount from_ token_id storage in
+            let () = if amount > 1n then failwith Error.fa2_insufficient_balance else () in
+            if amount = 0n then ledger 
+            else Storage.transfer from_ to_ token_id ledger
         in
-        let storage = List.fold_left handle_transfer storage transfer in
+        let ledger = List.fold_left transfer_one_token ledger txs in
+        {ledger; operators; token_metadata}
+
+    let transition (transfer: transfer) (storage: Storage.t): return = 
+        let storage = List.fold_left transfer_from storage transfer in
         ([], storage)
 end 
 
@@ -57,7 +61,7 @@ module Balance_of = struct
         let {requests; callback} = balance_of in
             let responses = List.map (fun request ->
             let {owner; token_id} = request in
-            let balance = Storage.get_balance owner token_id storage.ledger in
+            let balance = Storage.get_balance owner token_id storage in
             { request; balance}
         ) requests in
         let operation = Tezos.transaction responses 0tez callback in
