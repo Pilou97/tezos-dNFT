@@ -47,6 +47,13 @@ let mint_token_owned_by_sender () =
     let owner = Big_map.find_opt 0n next.ledger |> Option.unopt in
     assert (sender = owner)
 
+let mint_token_has_empty_operators () = 
+    let prev = Storage.empty in
+    let owner = Tezos.get_sender () in
+    let next = Common.transfer prev (Mint_token ()) in
+    let operators = Storage.get_operators owner 0n next in
+    assert (Set.size operators = 0n) 
+
 let test = 
     let () = mint_increments_counter () in
     let () = mint_add_metadata () in
@@ -54,4 +61,5 @@ let test =
     let () = mint_token_good_token_id () in
     let () = mint_token_has_owner () in
     let () = mint_token_owned_by_sender () in
+    let () = mint_token_has_empty_operators () in
     ()
