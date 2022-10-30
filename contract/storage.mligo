@@ -16,6 +16,13 @@ type t = {
     counter: nat;
 }
 
+let empty:t = {
+    ledger = Big_map.empty;
+    operators = Big_map.empty;
+    token_metadata = Big_map.empty;
+    counter = 0n
+}
+
 // Transfer exactly one token
 let transfer (from: address) (to: address) (token_id: nat) (ledger: ledger) =
     let address = Big_map.find_opt token_id ledger in
