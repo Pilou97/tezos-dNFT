@@ -19,8 +19,22 @@ let update_operators_only_owner_can_update () =
     let (_, result) = Common.transfer_exn prev update_metadata in
     Common.assert_failwith result Error.fa2_not_owner
 
+let cannot_update_reserved_empty () =
+    let reserved = "" in
+    let bytes = Bytes.pack 0 in
+    let update : Entrypoints.Update_metadata.update = (Update bytes) in
+    let metadata = Map.empty
+        |> Map.add reserved update
+    in
+    let _, token_id, prev = Common.Storage.with_token Storage.empty in
+    let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata} in
+    let update_metadata = Update_metadata [update_token] in
+    let (_, result) = Common.transfer_exn prev update_metadata in
+    Common.assert_failwith result Error.fa2_reserved_metadata_field 
+
 
 let test =
     let () = update_operators_owner_can_udpate () in
     let () = update_operators_only_owner_can_update () in
+    let () = cannot_update_reserved_empty () in
     ()
