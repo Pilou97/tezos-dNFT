@@ -39,34 +39,34 @@ type return = operation list * Storage.t
 //         ([], storage)
 // end 
 
-// module Balance_of = struct
-//     type request = {
-//         owner: address;
-//         token_id: nat;
-//     }
+module Balance_of = struct
+    type request = {
+        owner: address;
+        token_id: nat;
+    }
 
-//     type response = [@layout:comb] {
-//         request: request;
-//         balance: nat;
-//     }
+    type response = [@layout:comb] {
+        request: request;
+        balance: nat;
+    }
 
-//     type balance_of = [@layout:comb] {
-//         requests: request list;
-//         callback: response list contract;
-//     }
+    type balance_of = [@layout:comb] {
+        requests: request list;
+        callback: (response list) contract;
+    }
 
-//     type t = balance_of
+    type t = balance_of
 
-//     let transition (balance_of: balance_of) (storage: Storage.t): return = 
-//         let {requests; callback} = balance_of in
-//         let responses = List.map (fun request ->
-//             let {owner; token_id} = request in
-//             let balance = Storage.get_balance owner token_id storage in
-//             { request; balance}
-//         ) requests in
-//         let operation = Tezos.transaction responses 0tez callback in
-//         ([operation], storage)
-// end
+    let transition (balance_of: balance_of) (storage: Storage.t): return = 
+        let {requests; callback} = balance_of in
+        let responses: (response list) = List.map (fun (request:request):response ->
+            let {owner; token_id} = request in
+            let balance = Storage.get_balance owner token_id storage in
+            { request; balance}
+        ) requests in
+        let operation = Tezos.transaction responses 0mutez callback in
+        ([operation], storage)
+end
 
 module Update_operators = struct
     type operator = [@layout:comb]
