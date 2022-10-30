@@ -35,10 +35,13 @@ let cannot_update_reserved_name () = cannot_update_reserved_field "name"
 
 let cannot_update_reserved_symbol () = cannot_update_reserved_field "symbol"
 
+let cannot_update_reserved_decimals () = cannot_update_reserved_field "decimals"
+
 let test =
     let () = update_operators_owner_can_udpate () in
     let () = update_operators_only_owner_can_update () in
     let () = cannot_update_reserved_empty () in
     let () = cannot_update_reserved_name () in
     let () = cannot_update_reserved_symbol () in
+    let () = cannot_update_reserved_decimals () in
     ()
