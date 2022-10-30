@@ -121,4 +121,4 @@ let assert_can_update_metadata (address: address) (token_id: nat) (storage: t) =
             | None -> false
             | Some owner -> address = owner 
     in
-    if is_owner then () else failwith Error.fa2_not_owner 
+    if is_owner then () else failwith Error.fa2_not_owner
