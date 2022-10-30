@@ -13,6 +13,7 @@ type t = {
     ledger: ledger;
     operators: operators;
     token_metadata: (nat, metadata) big_map;
+    counter: nat;
 }
 
 // Transfer exactly one token
@@ -27,7 +28,7 @@ let transfer (from: address) (to: address) (token_id: nat) (ledger: ledger) =
             else failwith Error.fa2_not_owner
 
 let get_balance (holder: address) (token_id: nat) (storage: t) =
-    let {ledger; operators; token_metadata} = storage in
+    let {ledger; operators=_; token_metadata=_; counter=_} = storage in
     match Big_map.find_opt token_id ledger with
         | None -> 0n
         | Some owner -> if owner = holder
@@ -53,7 +54,7 @@ let remove_operator (operator: address) (owner: address) (token_id: nat) (operat
     Big_map.update (owner, token_id) (Some operators_set) operators
 
 let get_operators (owner: address) (token_id: nat) (storage: t) = 
-    let {ledger=_; operators; token_metadata=_} = storage in
+    let {ledger=_; operators; token_metadata=_; counter=_} = storage in
     match Big_map.find_opt (owner, token_id) operators with
         | None -> Set.empty
         | Some operators -> operators
@@ -67,12 +68,12 @@ let is_operator (operator: address) (owner: address) (token_id: nat) (operators:
 let get_token (token_id: nat) (storage: t) = Big_map.find_opt token_id storage.token_metadata
 
 let update_token (token_id: nat) (metadata: metadata) (storage: t) = 
-    let {ledger; operators; token_metadata} = storage in
+    let {ledger; operators; token_metadata; counter} = storage in
     let token_metadata = Big_map.update token_id (Some metadata) token_metadata in
-    {ledger; operators; token_metadata}
+    {ledger; operators; token_metadata; counter}
 
 let assert_can_transfer_token (address: address) (owner: address) (token_id: nat) (storage: t) = 
-    let {ledger; operators=_; token_metadata=_} = storage in
+    let {ledger; operators=_; token_metadata=_; counter=_} = storage in
     let is_owner: bool = 
         match Big_map.find_opt token_id ledger with
             | None -> failwith Error.fa2_token_undefined
@@ -84,7 +85,7 @@ let assert_can_transfer_token (address: address) (owner: address) (token_id: nat
     else failwith Error.fa2_not_operator
 
 let assert_token_defined (token_id: nat) (storage: t) = 
-    let {ledger=_; operators=_; token_metadata} = storage in
+    let {ledger=_; operators=_; token_metadata; counter=_} = storage in
     let token_exists = Big_map.mem token_id token_metadata in
     if token_exists then ()
     else failwith Error.fa2_token_undefined
@@ -93,3 +94,14 @@ let assert_sufficient_balance (amount: nat) (owner: address) (token_id: nat) (st
     let balance = get_balance owner token_id storage in
     if amount <= balance then () 
     else failwith Error.fa2_insufficient_balance
+
+let mint (owner:address) (storage:t) = 
+    let {ledger; operators; token_metadata; counter} = storage in
+    let metadata: metadata = {
+        token_id = counter;
+        token_info = Map.empty
+    } in
+    let _ = metadata in
+    let token_metadata = Big_map.add counter metadata token_metadata in
+    let ledger = Big_map.add counter owner ledger in
+    {ledger; operators; token_metadata; counter}
