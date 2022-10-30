@@ -32,9 +32,18 @@ let mint_token_good_token_id () =
     let { token_id; token_info = _ } = token_metadata in 
     assert (counter = token_id)
 
+let mint_token_has_owner () = 
+    let prev = Storage.empty in
+    let next = Common.transfer prev (Mint_token ()) in
+    let owner = Big_map.find_opt 0n next.ledger in
+    match owner with
+        | Some _ -> ()
+        | None -> Test.failwith "mitn token should address an owner"
+
 let test = 
     let () = mint_increments_counter () in
     let () = mint_add_metadata () in
     let () = mint_empty_token_info () in
     let () = mint_token_good_token_id () in
+    let () = mint_token_has_owner () in
     ()
