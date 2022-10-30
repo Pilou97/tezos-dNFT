@@ -113,3 +113,12 @@ let mint (owner:address) (storage:t) =
     let ledger = Big_map.add counter owner ledger in
     let counter = counter + 1n in
     {ledger; operators; token_metadata; counter}
+
+let assert_can_update_metadata (address: address) (token_id: nat) (storage: t) =
+    // TODO: duplicated code
+    let is_owner: bool = 
+        match Big_map.find_opt token_id storage.ledger with
+            | None -> false
+            | Some owner -> address = owner 
+    in
+    if is_owner then () else failwith Error.fa2_not_owner 
