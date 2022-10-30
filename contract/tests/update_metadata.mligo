@@ -54,8 +54,20 @@ let add_new_field () =
         | None -> failwith "Metadata should be set"
         | Some value -> assert (value = one)
 
+let update_existing_field () = 
+    let field = "new-field" in
+    let one = Bytes.pack 0 in
+
+    let update : Entrypoints.Update_metadata.update = (Update one) in
     let metadata = Map.empty |> Map.add field update in
     let _, token_id, prev = Common.Storage.with_token Storage.empty in
+    let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata} in
+    let update_metadata = Update_metadata [update_token] in
+    let (prev, _) = Common.transfer_exn prev update_metadata in
+
+    let two = Bytes.pack 1 in
+    let update : Entrypoints.Update_metadata.update = (Update two) in
+    let metadata = Map.empty |> Map.add field update in
     let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata} in
     let update_metadata = Update_metadata [update_token] in
     let (storage, _) = Common.transfer_exn prev update_metadata in
@@ -65,7 +77,7 @@ let add_new_field () =
     let value = Map.find_opt "new-field" token_info in
     match value with
         | None -> failwith "Metadata should be set"
-        | Some _ -> ()
+        | Some value -> assert (value = two)
 
 let test =
     let () = update_operators_owner_can_udpate () in
@@ -75,4 +87,5 @@ let test =
     let () = cannot_update_reserved_symbol () in
     let () = cannot_update_reserved_decimals () in
     let () = add_new_field () in
+    let () = update_existing_field () in
     ()
