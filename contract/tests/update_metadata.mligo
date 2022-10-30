@@ -33,9 +33,12 @@ let cannot_update_reserved_empty () = cannot_update_reserved_field ""
 
 let cannot_update_reserved_name () = cannot_update_reserved_field "name"
 
+let cannot_update_reserved_symbol () = cannot_update_reserved_field "symbol"
+
 let test =
     let () = update_operators_owner_can_udpate () in
     let () = update_operators_only_owner_can_update () in
     let () = cannot_update_reserved_empty () in
     let () = cannot_update_reserved_name () in
+    let () = cannot_update_reserved_symbol () in
     ()
