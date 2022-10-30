@@ -24,9 +24,17 @@ let mint_empty_token_info () =
     let size = Map.size token_info in
     assert (size = 0n)
 
+let mint_token_good_token_id () = 
+    let prev = Storage.empty in
+    let counter = prev.counter in
+    let next = Common.transfer prev (Mint_token ()) in
+    let token_metadata = Big_map.find_opt 0n next.token_metadata |> Option.unopt in
+    let { token_id; token_info = _ } = token_metadata in 
+    assert (counter = token_id)
 
 let test = 
     let () = mint_increments_counter () in
     let () = mint_add_metadata () in
     let () = mint_empty_token_info () in
+    let () = mint_token_good_token_id () in
     ()
