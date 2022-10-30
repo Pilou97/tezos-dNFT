@@ -40,10 +40,18 @@ let mint_token_has_owner () =
         | Some _ -> ()
         | None -> Test.failwith "mitn token should address an owner"
 
+let mint_token_owned_by_sender () = 
+    let prev = Storage.empty in
+    let sender = Tezos.get_sender () in
+    let next = Common.transfer prev (Mint_token ()) in
+    let owner = Big_map.find_opt 0n next.ledger |> Option.unopt in
+    assert (sender = owner)
+
 let test = 
     let () = mint_increments_counter () in
     let () = mint_add_metadata () in
     let () = mint_empty_token_info () in
     let () = mint_token_good_token_id () in
     let () = mint_token_has_owner () in
+    let () = mint_token_owned_by_sender () in
     ()

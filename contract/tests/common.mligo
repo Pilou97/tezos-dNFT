@@ -1,6 +1,7 @@
 #import "../main.mligo" "Main"
 
 // Util function to test a transfer
+// TODO: maybe we don't need to originate a contract ??
 let transfer storage entrypoint = 
     let addr, _, _ = Test.originate Main.main storage 0tez in
     let contract = Test.to_contract addr in
