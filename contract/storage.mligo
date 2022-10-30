@@ -111,4 +111,5 @@ let mint (owner:address) (storage:t) =
     let _ = metadata in
     let token_metadata = Big_map.add counter metadata token_metadata in
     let ledger = Big_map.add counter owner ledger in
+    let counter = counter + 1n in
     {ledger; operators; token_metadata; counter}
