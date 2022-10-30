@@ -3,41 +3,43 @@
 
 type return = operation list * Storage.t
 
-// module Transfer = struct
-//     type token_transfer = [@layout:comb]
-//     {
-//         to_: address;
-//         token_id: nat;
-//         amount: nat;
-//     }
+module Transfer = struct
+    type token_transfer = [@layout:comb]
+    {
+        to_: address;
+        token_id: nat;
+        amount: nat;
+    }
 
-//     type transfer_from = {
-//         from_: address;
-//         txs: token_transfer list
-//     }
+    type transfer_from = {
+        from_: address;
+        txs: token_transfer list
+    }
 
-//     type transfer = transfer_from list
+    type transfer = transfer_from list
 
-//     type t = transfer
+    type t = transfer
 
-//     let transfer_from  (storage, {from_; txs}) =
-//         let {ledger; operators; token_metadata } = storage in
-//         let sender = Tezos.get_sender () in
-//         let transfer_one_token (ledger, {to_; token_id; amount}) = 
-//             let () = Storage.assert_token_defined token_id storage in
-//             let () = Storage.assert_can_transfer_token sender from_ token_id storage in
-//             let () = Storage.assert_sufficient_balance amount from_ token_id storage in
-//             let () = if amount > 1n then failwith Error.fa2_insufficient_balance else () in
-//             if amount = 0n then ledger 
-//             else Storage.transfer from_ to_ token_id ledger
-//         in
-//         let ledger = List.fold_left transfer_one_token ledger txs in
-//         {ledger; operators; token_metadata}
+    let transfer_from  (storage, {from_; txs}) =
+        let {ledger; operators; token_metadata; counter } = storage in
+        let sender = Tezos.get_sender () in
+        let transfer_one_token (ledger, tx: Storage.ledger * token_transfer)=
+            let _ = ledger in
+            let {to_; token_id; amount} = tx in
+            let () = Storage.assert_token_defined token_id storage in
+            let () = Storage.assert_can_transfer_token sender from_ token_id storage in
+            let () = Storage.assert_sufficient_balance amount from_ token_id storage in
+            let () = if amount > 1n then failwith Error.fa2_insufficient_balance else () in
+            if amount = 0n then ledger 
+            else Storage.transfer from_ to_ token_id ledger
+        in
+        let ledger = List.fold_left transfer_one_token ledger txs in
+        {ledger; operators; token_metadata; counter}
 
-//     let transition (transfer: transfer) (storage: Storage.t): return = 
-//         let storage = List.fold_left transfer_from storage transfer in
-//         ([], storage)
-// end 
+    let transition (transfer: transfer) (storage: Storage.t): return = 
+        let storage = List.fold_left transfer_from storage transfer in
+        ([], storage)
+end 
 
 module Balance_of = struct
     type request = {
