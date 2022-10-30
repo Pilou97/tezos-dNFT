@@ -50,3 +50,49 @@
 
  - implement FA1.2
  - event ?
+
+# Tezos dNFT
+TODO: add description of the project, quote the bounty
+
+## Requirements:
+ - ligo 0.54.1 
+ - tezos-client (tested with 4ca33194)
+
+## How to compile:
+
+TODO: explain the comand
+
+```bash
+ligo compile contract contract/main.mligo --protocol kathmandu --output-file nft.tz
+```
+
+
+## How to originate:
+
+TODO: explain the comand, explain the storage
+
+```bash
+storage="(Pair (Pair 0 {}) {} {})"
+tezos-client originate contract dNFT transferring 0 from alice running "`cat nft.tz`" --init "$storage" --burn-cap 1 --force
+```
+
+## How to use:
+TODO: indicates how to add metadata, remove metadata, update metadata
+
+## How to transform your NFT to a dNFT
+TODO: explain the code and what to add in an existing ligo nft code
+
+## Tests:
+
+TODO: explain the test strategy
+
+```bash
+ligo run test contract/tests/origination.mligo
+ligo run test contract/tests/mint.mligo
+ligo run test contract/tests/update_metadata.mligo
+```
+TODO: add some code coverage ??
+
+# Authors:
+- Pierre-Louis Dubois
+- Pierre-Jean Sauvage
