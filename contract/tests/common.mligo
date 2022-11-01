@@ -13,6 +13,8 @@ let bob = Test.nth_bootstrap_account 0
 
 let alice =  Test.nth_bootstrap_account 1 
 
+let other address = if address = bob then alice else bob
+
 let with_bob () = Test.set_source bob
 
 let with_alice () = Test.set_source alice 
