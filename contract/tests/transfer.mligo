@@ -54,11 +54,21 @@ let transfer_to_someone () =
     let () = assert (next_balance = 0n) in
     assert (previous_balance <> next_balance)
 
+let transfer_zero () = 
+    let owner, token_id, previous = Common.Storage.with_token Storage.empty in
+    let previous_balance = Storage.get_balance owner token_id previous in
+    let transfer = make_transfer owner token_id (Common.other owner) 0n in
+    let next, result = Common.transfer previous transfer in
+    let next_balance = Storage.get_balance owner token_id next in
+    let () = Common.assert_success result in
+    assert (next_balance = previous_balance)
+
 let test = 
     let () = token_has_to_be_defined () in
     let () = only_owner_can_transfer_token () in
     let () = cannot_transfer_amount_bigger_than_one () in
     let () = can_transfer_to_himself () in
     let () = transfer_to_someone () in
+    let () = transfer_zero () in
     ()
 
