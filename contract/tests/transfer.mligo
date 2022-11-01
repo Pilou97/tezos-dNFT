@@ -63,6 +63,34 @@ let transfer_zero () =
     let () = Common.assert_success result in
     assert (next_balance = previous_balance)
 
+let transfer_is_atomic () = 
+    let owner, token_id, previous = Common.Storage.with_token Storage.empty in
+    let owner_previous_balance = Storage.get_balance owner token_id previous in
+    let other_previous_balance = Storage.get_balance (Common.other owner) token_id previous in
+    // This transfer should succeed
+    let token_transfer_1 = {
+        to_ = (Common.other owner);
+        token_id;
+        amount = 1n;
+    } in
+    // This transfer should failed
+    let token_transfer_2 = {
+        to_ = (Common.other owner);
+        token_id = 5n;
+        amount = 1n;
+    } in
+    let transfer_from = {
+        from_ = owner;
+        txs = [token_transfer_1; token_transfer_2]
+    } in
+    let transfer = Transfer ([transfer_from]) in
+    let next, result = Common.transfer previous transfer in
+    let owner_next_balance = Storage.get_balance owner token_id next in
+    let other_next_balance = Storage.get_balance (Common.other owner) token_id next in
+    let () = assert (owner_previous_balance = owner_next_balance) in
+    let () = assert (other_previous_balance = other_next_balance) in
+    Common.assert_failwith result Error.fa2_token_undefined
+
 let test = 
     let () = token_has_to_be_defined () in
     let () = only_owner_can_transfer_token () in
@@ -70,5 +98,6 @@ let test =
     let () = can_transfer_to_himself () in
     let () = transfer_to_someone () in
     let () = transfer_zero () in
+    let () = transfer_is_atomic () in
     ()
 
