@@ -29,8 +29,15 @@ let only_owner_can_transfer_token () =
     let _, result = Common.transfer storage transfer in
     Common.assert_failwith result Error.fa2_not_operator // TODO: is it the correct error to throw ?
 
+let cannot_transfer_amount_bigger_than_one () = 
+    let owner, token_id, storage = Common.Storage.with_token Storage.empty in
+    let transfer = make_transfer owner token_id Common.alice 2n in
+    let _, result = Common.transfer storage transfer in
+    Common.assert_failwith result Error.fa2_insufficient_balance
+
 let test = 
     let () = token_has_to_be_defined () in
     let () = only_owner_can_transfer_token () in
+    let () = cannot_transfer_amount_bigger_than_one () in
     ()
 
