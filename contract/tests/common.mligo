@@ -5,14 +5,9 @@
 let transfer storage entrypoint = 
     let addr, _, _ = Test.originate Main.main storage 0tez in
     let contract = Test.to_contract addr in
-    let _ = Test.transfer_to_contract contract entrypoint 1mutez in
-    Test.get_storage addr
-
-let transfer_exn storage entrypoint= 
-    let addr, _, _ = Test.originate Main.main storage 0tez in
-    let contract = Test.to_contract addr in
     let res = Test.transfer_to_contract contract entrypoint 1mutez in
-    (Test.get_storage addr, res)
+    let storage = Test.get_storage addr in
+    storage, res
 
 let with_bob () = 
     let _ = Test.new_account () in
@@ -26,13 +21,17 @@ let with_alice () =
 
 let assert_failwith (result: test_exec_result) error = 
     match result with
-        | Success _ -> failwith "should fail"
+        | Success _ -> Test.failwith "should fail"
         | Fail (Rejected (michelson_program, _))  ->
             let reason = Test.to_string michelson_program in
             let error = "\"" ^ error ^ "\"" in
             assert (reason = error)
-        | Fail _ -> failwith "should have failed with a different error"
+        | Fail _ -> Test.failwith "should have failed with a different error"
 
+let assert_success (result: test_exec_result) =
+    match result with
+        | Success _ -> ()
+        | Fail _ -> Test.failwith "Should be a success"
 
 module Storage = struct
     let with_token storage = 
