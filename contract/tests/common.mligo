@@ -38,5 +38,5 @@ module Storage = struct
         let contract = Test.to_contract addr in
         let _ = Test.transfer_to_contract_exn contract (Mint_token ()) 1mutez in
         let storage = Test.get_storage addr in
-        (owner, 0n, storage)
+        (owner, 0n, storage) // Todo: should not be 0n
 end

@@ -22,8 +22,15 @@ let token_has_to_be_defined () =
     let _ , result = Common.transfer Storage.empty transfer in
     Common.assert_failwith result Error.fa2_token_undefined
 
+let only_owner_can_transfer_token () = 
+    let owner, token_id, storage = Common.Storage.with_token Storage.empty in
+    let () = Common.with_bob () in
+    let transfer = make_transfer owner token_id Common.alice 1n in
+    let _, result = Common.transfer storage transfer in
+    Common.assert_failwith result Error.fa2_not_operator // TODO: is it the correct error to throw ?
 
 let test = 
     let () = token_has_to_be_defined () in
+    let () = only_owner_can_transfer_token () in
     ()
 
