@@ -9,15 +9,13 @@ let transfer storage entrypoint =
     let storage = Test.get_storage addr in
     storage, res
 
-let with_bob () = 
-    let _ = Test.new_account () in
-    let address = Test.nth_bootstrap_account 0 in
-    Test.set_source address
+let bob = Test.nth_bootstrap_account 0
 
-let with_alice () = 
-    let _ = Test.new_account () in
-    let address = Test.nth_bootstrap_account 1 in
-    Test.set_source address
+let alice =  Test.nth_bootstrap_account 1 
+
+let with_bob () = Test.set_source bob
+
+let with_alice () = Test.set_source alice 
 
 let assert_failwith (result: test_exec_result) error = 
     match result with
