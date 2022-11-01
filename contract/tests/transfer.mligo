@@ -35,6 +35,15 @@ let cannot_transfer_amount_bigger_than_one () =
     let _, result = Common.transfer storage transfer in
     Common.assert_failwith result Error.fa2_insufficient_balance
 
+let can_transfer_to_himself () = 
+    let owner, token_id, previous = Common.Storage.with_token Storage.empty in
+    let previous_balance = Storage.get_balance owner token_id previous in
+    let transfer = make_transfer owner token_id owner 1n in
+    let next, result = Common.transfer previous transfer in
+    let next_balance = Storage.get_balance owner token_id next in
+    let () = Common.assert_success result in
+    assert (previous_balance = next_balance)
+
 let test = 
     let () = token_has_to_be_defined () in
     let () = only_owner_can_transfer_token () in
