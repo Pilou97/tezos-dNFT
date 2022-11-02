@@ -122,3 +122,7 @@ let assert_can_update_metadata (address: address) (token_id: nat) (storage: t) =
             | Some owner -> address = owner 
     in
     if is_owner then () else failwith Error.fa2_not_owner
+
+let assert_exists (token_id: nat) (storage: t) =
+    if Big_map.mem token_id storage.token_metadata then ()
+    else failwith Error.fa2_token_undefined

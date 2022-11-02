@@ -119,6 +119,7 @@ module Update_metadata = struct
     let update_token (storage, update_token: Storage.t * update_token): Storage.t = 
         // Some fields are reserved, so they can't be updated
         let {token_id; metadata} = update_token in
+        let () = Storage.assert_exists token_id storage in
         let () = Storage.assert_can_update_metadata (Tezos.get_sender ()) token_id storage in
         if Map.mem "" metadata then failwith Error.fa2_reserved_metadata_field
         else if Map.mem "name" metadata then failwith Error.fa2_reserved_metadata_field

@@ -116,6 +116,16 @@ let remove_existing_field () =
         | Some _ ->failwith "the field should has been removed"
         | None -> ()
 
+let cannot_update_undefined_token () = 
+    let field = "to-remove" in
+    let one = Bytes.pack 0 in
+    let update : Entrypoints.Update_metadata.update = (Update one) in
+    let metadata = Map.empty |> Map.add field update in
+    let update_token: Entrypoints.Update_metadata.update_token = {token_id=5n; metadata} in
+    let update_metadata = Update_metadata [update_token] in
+    let _, result = Common.transfer Storage.empty update_metadata in
+    Common.assert_failwith result Error.fa2_token_undefined
+
 let test =
     let () = update_operators_owner_can_udpate () in
     let () = update_operators_only_owner_can_update () in
@@ -127,4 +137,5 @@ let test =
     let () = update_existing_field () in
     let () = remove_field () in
     let () = remove_existing_field () in
+    let () = cannot_update_undefined_token () in
     ()
