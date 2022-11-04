@@ -2,6 +2,8 @@ tezos-client --endpoint http://localhost:20000 originate contract nft transferri
 
 sleep 4
 
-tezos-client --endpoint http://localhost:20000 transfer 0 from alice to nft --arg "(Left (Left (Right Unit)))" --burn-cap 1
+tezos-client --endpoint http://localhost:20000 transfer 0 from alice to nft --arg '(Left (Left (Right { Elt "latitude" 0x01 ; Elt "longitude" 0x02 })))' --burn-cap 1
+
+tezos-client --endpoint http://localhost:20000 transfer 0 from alice to nft --arg '(Left (Left (Right { Elt "latitude" 0x01 ; Elt "longitude" 0x02 })))' --burn-cap 1
 
 tezos-client --endpoint http://localhost:20000 show known contract nft

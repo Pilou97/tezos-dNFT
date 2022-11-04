@@ -155,13 +155,14 @@ module Update_metadata = struct
 end
 
 module Mint_token = struct
-    type mint = unit
+    type mint = (string, bytes) map
     type t = mint
 
     let transition (mint: mint) (storage: Storage.t): return = 
-        let _ = mint in
         let sender = Tezos.get_sender () in
         let operations: operation list = [] in
-        let storage = Storage.mint sender storage in
+        let token_id, storage = Storage.mint sender storage in
+        let metadata = {token_id; token_info = mint} in
+        let storage = Storage.update_token token_id metadata storage in
         operations, storage
 end

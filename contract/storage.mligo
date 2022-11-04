@@ -103,16 +103,16 @@ let assert_sufficient_balance (amount: nat) (owner: address) (token_id: nat) (st
     else failwith Error.fa2_insufficient_balance
 
 let mint (owner:address) (storage:t) = 
-    let {ledger; operators; token_metadata; counter} = storage in
+    let {ledger; operators; token_metadata; counter=token_id} = storage in
     let metadata: metadata = {
-        token_id = counter;
+        token_id;
         token_info = Map.empty
     } in
     let _ = metadata in
-    let token_metadata = Big_map.add counter metadata token_metadata in
-    let ledger = Big_map.add counter owner ledger in
-    let counter = counter + 1n in
-    {ledger; operators; token_metadata; counter}
+    let token_metadata = Big_map.add token_id metadata token_metadata in
+    let ledger = Big_map.add token_id owner ledger in
+    let counter = token_id + 1n in
+    (token_id, {ledger; operators; token_metadata; counter})
 
 let assert_can_update_metadata (address: address) (token_id: nat) (storage: t) =
     // TODO: duplicated code

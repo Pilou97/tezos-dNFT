@@ -38,7 +38,7 @@ module Storage = struct
         let owner = Tezos.get_sender () in
         let addr, _, _ = Test.originate Main.main storage 0tez in
         let contract = Test.to_contract addr in
-        let _ = Test.transfer_to_contract_exn contract (Mint_token ()) 1mutez in
+        let _ = Test.transfer_to_contract_exn contract (Mint_token Map.empty) 1mutez in
         let storage = Test.get_storage addr in
         (owner, 0n, storage) // Todo: should not be 0n
 end
