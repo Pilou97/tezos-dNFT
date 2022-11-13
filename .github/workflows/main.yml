@@ -74,9 +74,6 @@ jobs:
       - name: Add private key
         run: ./octez-client import secret key alice unencrypted:edsk3QoqBuvdamxouPhin7swCvkQNgq4jP5KZPbwWNnwdZpSpJiEbq
 
-      - name: log dc
-        run: docker-compose ps
-
       - name: Originate
         run: ./octez-client --endpoint http://localhost:20000 originate contract nft transferring 0 from alice running "`cat nft.tz`" --init "${{env.INITIAL_STORAGE}}" --burn-cap 1
 
