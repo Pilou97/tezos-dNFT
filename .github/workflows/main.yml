@@ -20,7 +20,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Compile contract
-        run: ${{env.LIGO}} compile contract contract/main.mligo --protocol kathmandu
+        run: ${{env.LIGO}} compile contract contract/main.mligo --protocol kathmandu --output-file nft.tz
+
+      - name: Upload compiled artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled contract
+          path: ${{ github.workspace }}/nft.tz
 
   tests:
     runs-on: ubuntu-latest
@@ -39,3 +45,65 @@ jobs:
 
       - name: Testing transfer entrypoint
         run: ${{env.LIGO}} run test contract/tests/transfer.mligo
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: compile
+    env:
+      INITIAL_STORAGE: (Pair (Pair 0 {}) {} {})
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download a single artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: compiled contract
+
+      - name: Running flextesa
+        run: docker-compose up -d
+
+      - name: Install octez-client
+        run: |
+          wget https://github.com/serokell/tezos-packaging/releases/download/v15.0-1/octez-client
+          chmod +x octez-client
+
+      - name: Wait for flextesa to be ready
+        run: sleep 10
+
+      - name: Add private key
+        run: ./octez-client import secret key alice unencrypted:edsk3QoqBuvdamxouPhin7swCvkQNgq4jP5KZPbwWNnwdZpSpJiEbq
+
+      - name: log dc
+        run: docker-compose ps
+
+      - name: Originate
+        run: ./octez-client --endpoint http://localhost:20000 originate contract nft transferring 0 from alice running "`cat nft.tz`" --init "${{env.INITIAL_STORAGE}}" --burn-cap 1
+
+  deploy-ghostnet:
+    runs-on: ubuntu-latest
+    needs:
+      - compile
+      - e2e-tests
+      - tests
+    env:
+      ENDPOINT: https://rpc.tzkt.io/ghostnet
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download a single artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: compiled contract
+      - name: Install octez-client
+        run: |
+          wget https://github.com/serokell/tezos-packaging/releases/download/v15.0-1/octez-client
+          chmod +x octez-client
+      - name: Add private key
+        run: ./octez-client import secret key ghostnet-user unencrypted:${{ secrets.GHOSTNET_PRIVATE_KEY }}
+
+      - name: Originate contract
+        env:
+          INITIAL_STORAGE: "(Pair (Pair 0 {}) {} {})"
+        run: ./octez-client --endpoint ${{ env.ENDPOINT }} originate contract nft transferring 0 from ghostnet-user running "`cat nft.tz`" --init "${{ env.INITIAL_STORAGE }}" --burn-cap 1
