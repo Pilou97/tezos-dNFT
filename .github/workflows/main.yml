@@ -1,0 +1,41 @@
+name: "Main workflow"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request_target:
+    branches:
+      - main
+
+env:
+  LIGO_VERSION: 0.54.1
+  LIGO: docker run --rm -v "$PWD":"$PWD" -w "$PWD" ligolang/ligo:${LIGO_VERSION}
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Compile contract
+        run: ${{env.LIGO}} compile contract contract/main.mligo --protocol kathmandu
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Testing origination
+        run: ${{env.LIGO}} run test contract/tests/origination.mligo
+
+      - name: Testing mint entrypoint
+        run: ${{env.LIGO}} run test contract/tests/mint.mligo
+
+      - name: Testing update metadata entrypoint
+        run: ${{env.LIGO}} run test contract/tests/update_metadata.mligo
+
+      - name: Testing transfer entrypoint
+        run: ${{env.LIGO}} run test contract/tests/transfer.mligo
