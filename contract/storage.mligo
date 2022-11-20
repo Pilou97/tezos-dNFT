@@ -55,23 +55,27 @@ let get_balance (holder: address) (token_id: nat) (storage: t) =
             then 1n
             else 0n
 
-let add_operator (operator: address) (owner: address) (token_id: nat) (operators: operators) = 
+let add_operator (operator: address) (owner: address) (token_id: nat) (storage:t) =
+    let {metadata; ledger; operators; token_metadata; counter} = storage in
     let operators_set = Big_map.find_opt (owner, token_id) operators in
     let operators_set = match operators_set with
         | None -> Set.empty 
         | Some operators -> operators
     in
     let operators_set = Set.update operator true operators_set in
-    Big_map.update (owner, token_id) (Some operators_set) operators
+    let operators = Big_map.update (owner, token_id) (Some operators_set) operators in
+    {metadata; ledger; operators; token_metadata; counter}
 
-let remove_operator (operator: address) (owner: address) (token_id: nat) (operators: operators) = 
+let remove_operator (operator: address) (owner: address) (token_id: nat) (storage:t) = 
+    let {metadata; ledger; operators; token_metadata; counter} = storage in
     let operators_set = Big_map.find_opt (owner, token_id) operators in
     let operators_set = match operators_set with
         | None -> Set.empty 
         | Some operators -> operators
     in
     let operators_set = Set.update operator false operators_set in
-    Big_map.update (owner, token_id) (Some operators_set) operators
+    let operators = Big_map.update (owner, token_id) (Some operators_set) operators in
+    {metadata; ledger; operators; token_metadata; counter}
 
 let get_operators (owner: address) (token_id: nat) (storage: t) = 
     let {metadata=_; ledger=_; operators; token_metadata=_; counter=_} = storage in
