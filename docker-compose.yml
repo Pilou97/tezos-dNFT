@@ -1,7 +1,7 @@
 services:
   flextesa:
     container_name: flextesa
-    image: oxheadalpha/flextesa:latest
+    image: oxheadalpha/flextesa:20221026
     environment:
       block_time: 2
     command: kathmandubox start
