@@ -7,14 +7,12 @@
             - start the server and check
             - mint a new token
             - check a few moments later that temperature is set
-    - get the block time from the rpc
+    - get the block time from the rpc => env var
 
 - contract:
     - end to end tests 
     - add a way to protect fields
     - add a meta operator which can update the metadata of a token
-    - view
-        - metadata
 
 - CI/CD:
     - get easily the contract address
@@ -22,7 +20,3 @@
     - fix flextesa version
     - add e2e tests when they exists
     - only deploy on push on main
-
-- on-chain: example
-   - need to find a good example
-   - readme
