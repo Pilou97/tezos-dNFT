@@ -52,7 +52,7 @@ The weather application will update in real time the temperature of the differen
 When a new temperature is found, an operation will be submitted to the smart contract to update the different metadata.
 You should see a log like:
 
-```json
+```
 [
   { key: '0', latitude: 50.63297, longitude: 3.05858, temperature: 9 },
   { key: '1', latitude: 0.000001, longitude: 0.000002, temperature: 26}
