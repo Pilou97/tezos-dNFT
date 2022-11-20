@@ -7,8 +7,8 @@ fi
 
 alias ligo="docker run --rm -v "$PWD":"$PWD" -w "$PWD" ligolang/ligo:0.55.0"
 
-contract=$(ligo compile contract main.mligo)
-storage=$(ligo compile storage main.mligo "Storage.empty ()")
+contract=$(ligo compile contract contract/main.mligo)
+storage=$(ligo compile storage contract/main.mligo "Storage.empty ()")
 
 tezos-client --endpoint http://localhost:$PORT originate contract nft transferring 0 from alice running "$contract" --init "$storage" --burn-cap 1 --force
 
