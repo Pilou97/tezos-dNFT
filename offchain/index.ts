@@ -58,7 +58,8 @@ const getTokens = (contract:any) : Promise<Array<{key: number, longitude: number
         .then(storage => {
             const counter = storage["counter"].c[0];
             const keys = [... new Array(counter).keys()];
-            const values = storage["token_metadata"].getMultipleValues(keys);
+            return storage["token_metadata"].getMultipleValues(keys);
+        }).then(values => {
             const tokens = Object.fromEntries(values.valueMap);
             return Object.keys(tokens).map(key => {
                 const metadata = Object.fromEntries(tokens[key].token_info.valueMap);
