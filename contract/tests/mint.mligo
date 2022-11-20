@@ -3,14 +3,14 @@
 #import "../main.mligo" "Main"
 
 let mint_increments_counter () =
-    let prev = Storage.empty in
+    let prev = Storage.empty () in
     let (next, result) = Common.transfer prev (Mint_token Map.empty) in
     let counter = next.counter in
     let () = assert (counter = 1n) in
     Common.assert_success result
 
 let mint_add_metadata () = 
-    let prev = Storage.empty in
+    let prev = Storage.empty () in
     let previous_metadata = Big_map.mem 0n prev.token_metadata in
     let next, result = Common.transfer prev (Mint_token Map.empty) in
     let next_metadata = Big_map.mem 0n next.token_metadata in
@@ -19,7 +19,7 @@ let mint_add_metadata () =
     Common.assert_success result
 
 let mint_empty_token_info () = 
-    let prev = Storage.empty in
+    let prev = Storage.empty () in
     let next, result = Common.transfer prev (Mint_token Map.empty) in
     let token_metadata = Big_map.find_opt 0n next.token_metadata |> Option.unopt in
     let { token_id=_; token_info } = token_metadata in 
@@ -28,7 +28,7 @@ let mint_empty_token_info () =
     Common.assert_success result
 
 let mint_token_good_token_id () = 
-    let prev = Storage.empty in
+    let prev = Storage.empty () in
     let counter = prev.counter in
     let next, result = Common.transfer prev (Mint_token Map.empty) in
     let token_metadata = Big_map.find_opt 0n next.token_metadata |> Option.unopt in
@@ -37,7 +37,7 @@ let mint_token_good_token_id () =
     Common.assert_success result
 
 let mint_token_has_owner () = 
-    let prev = Storage.empty in
+    let prev = Storage.empty () in
     let next, result = Common.transfer prev (Mint_token Map.empty) in
     let owner = Big_map.find_opt 0n next.ledger in
     let () = Common.assert_success result in
@@ -46,7 +46,7 @@ let mint_token_has_owner () =
         | None -> Test.failwith "mitn token should address an owner"
 
 let mint_token_owned_by_sender () = 
-    let prev = Storage.empty in
+    let prev = Storage.empty () in
     let sender = Tezos.get_sender () in
     let next, result = Common.transfer prev (Mint_token Map.empty) in
     let owner = Big_map.find_opt 0n next.ledger |> Option.unopt in
@@ -54,7 +54,7 @@ let mint_token_owned_by_sender () =
     Common.assert_success result
 
 let mint_token_has_empty_operators () = 
-    let prev = Storage.empty in
+    let prev = Storage.empty () in
     let owner = Tezos.get_sender () in
     let next, result = Common.transfer prev (Mint_token Map.empty) in
     let operators = Storage.get_operators owner 0n next in

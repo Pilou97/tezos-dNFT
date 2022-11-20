@@ -1,0 +1,12 @@
+{
+    "name": "dNFT implementation",
+    "description": "dNFT implementation as described in the tezos bounty",
+    "authors": [
+        "Pierre-Louis Dubois",
+        "Pierre-Jean Sauvage"
+    ],
+    "homepage": "https://github.com/Pilou97/tezos-dNFT",
+    "interfaces": [
+        "TZIP-12"
+    ]
+}
