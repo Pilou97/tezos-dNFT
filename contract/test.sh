@@ -4,3 +4,4 @@ ligo run test tests/mint.mligo
 ligo run test tests/origination.mligo
 ligo run test tests/transfer.mligo
 ligo run test tests/update_metadata.mligo
+ligo run test tests/update_operators.mligo
