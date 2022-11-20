@@ -18,6 +18,6 @@ sleep 4
 
 octez-client --endpoint http://localhost:$PORT transfer 0 from alice to nft --arg '(Left (Left (Right { Elt "latitude" 0x0304990A ; Elt "longitude" 0x002EAB94 })))' --burn-cap 1
 
-octez-client --endpoint http://localhost:$PORT transfer 0 from alice to nft --arg '(Left (Left (Right { Elt "latitude" 0x01 ; Elt "longitude" 0x02 })))' --burn-cap 1
+octez-client --endpoint http://localhost:$PORT transfer 0 from alice to nft --arg '(Left (Left (Right { Elt "latitude" 0x00 ; Elt "longitude" 0x00 })))' --burn-cap 1
 
 octez-client --endpoint http://localhost:$PORT show known contract nft
