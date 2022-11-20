@@ -65,18 +65,16 @@ Ghostnet or Mainnet, please adapt the endpoint argument.
 
 First you need to have a storage. At the beginning our contract will be empty,
 it's more convenient.
-Then you can mint a token with the metadata you want.
 
 ```bash
 storage="(Pair (Pair 0 {}) {} {})"
 tezos-client originate contract dNFT transferring 0 from alice running "`cat nft.tz`" --init "$storage" --burn-cap 1 --force
-tezos-client --endpoint http://localhost:20000 transfer 0 from alice to nft --arg '(Left (Left (Right { Elt "temperature" 0xF4 ; })))' --burn-cap 1
 ```
 
 ### Mint
 
 Let's mint a token which will hold the temperature of a city.
-The following command will mint a token with a metadata field called "temperature", the value should be a byte, here 20 degrees in hexadecimal it's 0x14.
+The following command will mint a token with a metadata field called "temperature", the value should be a byte, here 20 degrees (0x14 in hexadecimal).
 ```
 tezos-client --endpoint http://localhost:20000 transfer 0 from alice to nft --arg '(Left (Left (Right { Elt "temperature" 0x14 ; })))' --burn-cap 1
 ```
