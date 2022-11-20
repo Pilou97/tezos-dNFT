@@ -34,14 +34,17 @@ let empty () : t =
     }
 
 // Transfer exactly one token
-let transfer (from: address) (to: address) (token_id: nat) (ledger: ledger) =
+let transfer (from: address) (to: address) (token_id: nat) (storage: t) =
+    let {metadata; ledger; operators; token_metadata; counter} = storage in
     let address = Big_map.find_opt token_id ledger in
     match address with
         | None -> // Which means the owner has 0 token, so then he can only transfer token to him self
-            if from = to then ledger
+            if from = to then storage
             else failwith Error.fa2_insufficient_balance
         | Some owner -> if owner = from 
-            then Big_map.update token_id (Some to) ledger
+            then 
+                let ledger = Big_map.update token_id (Some to) ledger in
+                {metadata; ledger; operators; token_metadata; counter}
             else failwith Error.fa2_not_owner
 
 let get_balance (holder: address) (token_id: nat) (storage: t) =
