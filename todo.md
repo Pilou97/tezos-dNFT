@@ -17,5 +17,4 @@
 - CI/CD:
     - get easily the contract address
     - initial storage to be compiled
-    - fix flextesa version
     - add e2e tests when they exists
