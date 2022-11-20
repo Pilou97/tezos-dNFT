@@ -12,9 +12,6 @@
 - contract:
     - clean the code
     - end to end tests 
-    - unit tests:
-        - update_operators
-        - balance_of
     - add a way to protect fields
     - add a meta operator which can update the metadata of a token
     - view
