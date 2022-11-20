@@ -4,10 +4,12 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - "dev"
+      - "main"
   pull_request_target:
     branches:
-      - main
+      - "dev"
+      - "main"
 
 env:
   LIGO_VERSION: 0.54.1
@@ -82,6 +84,18 @@ jobs:
 
       - name: Originate
         run: ./octez-client --endpoint http://localhost:20000 originate contract nft transferring 0 from alice running "`cat nft.tz`" --init "`cat storage.tz`" --burn-cap 1
+
+  e2e-tests-example:
+    runs-on: ubuntu-latest
+    needs:
+      - compile
+      - tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run the test
+        run: ./tests/run-tests.sh
 
   deploy-ghostnet:
     if: github.ref == 'refs/heads/main'
