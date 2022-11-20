@@ -14,7 +14,12 @@ interface WeatherData {
       }
 }
 
-const GetTempFromOpenMeteo = (latitude, longitude: number) =>
+/**
+ * Returns the temperature from open meteo for a given latitude and longitude.
+ * @param latitude the first coordinate
+ * @param longitude the second coordinate
+ */
+const GetTempFromOpenMeteo = (latitude: number, longitude: number): Promise<number> =>
     fetch(`https://api.open-meteo.com/v1/forecast?current_weather=true&`+
     `latitude=${latitude}&longitude=${longitude}&timezone=auto`)
     .then((resp) => resp.json())
@@ -22,120 +27,114 @@ const GetTempFromOpenMeteo = (latitude, longitude: number) =>
         return Math.round((res as WeatherData).current_weather.temperature)
     })
 
-
-
-const balance = (tezos: TezosToolkit, signer: InMemorySigner) => {
-    signer.publicKeyHash().then((address) => tezos.tz.getBalance(address)).then(console.log);
-}
-
+/**
+ * Converts the metadata to a Michelson parameter
+ */
 const toPayload = ({key, temperature}) => {
     const hex = temperature.toString(16);
-    const hexa = (hex.length % 2 === 1) ? "0"+hex : hex;
+    const hexadecimal = (hex.length % 2 === 1) ? `0${hex}` : hex;
     return {
         token_id: key,
         metadata: {
-            "temperature": {update: hexa}
+            temperature: {
+                update: hexadecimal
+            }
         }
     }
 }
 
+/**
+ * Returns the contract for a given address
+ * @param tezos the TezosToolkit from Taquito
+ * @param contract the KT1 address of the contract
+ */
 const getContract = (tezos:TezosToolkit, contract: string)  => tezos.contract.at(contract)
 
-
+/**
+ * Retrieves all the metadata of all the tokens in a FA2 contract.
+ */
 const getTokens = (contract:any) : Promise<Array<{key: number, longitude: number, latitude: number}>> => {
     return contract.storage()
-        .then((storage:any) => {
-            const counter = storage["counter"].c[0]; // Find a better way
+        .then(storage => {
+            const counter = storage["counter"].c[0];
             const keys = [... new Array(counter).keys()];
-            return storage["token_metadata"].getMultipleValues(keys)
+            const values = storage["token_metadata"].getMultipleValues(keys);
+            const tokens = Object.fromEntries(values.valueMap);
+            return Object.keys(tokens).map(key => {
+                const metadata = Object.fromEntries(tokens[key].token_info.valueMap);
+                const latitude = Number("0x" + metadata['"latitude"']) / 1_000_000;
+                const longitude = Number("0x" + metadata['"longitude"']) / 1_000_000;
+                const temperature = Number("0x" + metadata['"temperature"']);
+                return {key, latitude, longitude, temperature};
+            }, {})
         })
-        .then(tokens =>  Object.fromEntries(tokens.valueMap))
-        .then(tokens => Object.keys(tokens).map(key => {
-            const metadata = Object.fromEntries(tokens[key].token_info.valueMap);
-            const latitude = Number("0x" + metadata['"latitude"']) / 1_000_000;
-            const longitude = Number("0x" + metadata['"longitude"']) / 1_000_000;
-            const temperature = Number("0x" + metadata['"temperature"']);
-            return {key, latitude, longitude, temperature};
-        }, {}))
-        .then(tokens => {
-            console.log(tokens);
-            return tokens
-        })
-        // return contact.methods.update_metadata(toPayload(temp)).send();
+        .then(storage => {
+            console.log(storage); // For debug purpose
+            return storage
+        });
 }
 
+/**
+ * Returns the temperatures of a token collection
+ * @param tokens the metadata of different tokens
+ * @return the list of temperature with the id of the associated token
+ */
+const getTokenTemperatures = (tokens: Array<{key: number, latitude: number, longitude: number}>): Promise<Array<{key: number, temperature: number}>> => {
+    return Promise.all(tokens.map(({key, latitude, longitude}) =>
+        GetTempFromOpenMeteo(latitude, longitude)
+        .then(temperature => ({key, temperature}))
+    ));
+}
+
+/**
+ * Function that updates the contract.
+ * It fetches all the existing tokens
+ * It fetches the new temperatures
+ * And commit to Tezos only the updated temperatures
+ */
 const updateContract = async (tezos: any, contractAddress:string): Promise<null> => {
     const contract = await getContract(tezos, contractAddress);
     const tokens = await getTokens(contract);
-    const newTemperatures = await Promise.all(tokens.map(({key, latitude, longitude}) =>
-         GetTempFromOpenMeteo(latitude, longitude)
-            .then(temperature => ({key, temperature}))
-    ));
-    // To test
-    const tokenToUpdate = newTemperatures
+    const newTemperatures = await getTokenTemperatures(tokens);
+    const tokensToUpdate = newTemperatures
         .filter(({key, temperature}) => {
             const token:any = tokens.find(({key:token_id}) => token_id === key);
             return token.temperature !== temperature
-        });
-    if (tokenToUpdate.length === 0) return null;
-    const payload = tokenToUpdate.map(toPayload);
-    const operation = await contract.methods.update_metadata(payload).send();
+        })
+        .map(toPayload);
+    if (tokensToUpdate.length === 0) return null;
+    await contract.methods.update_metadata(tokensToUpdate).send();
     console.log("update success");
     return null;
 }
 
-interface geo {
-    longitude: number,
-    latitude: number
-}
-
-
-const getGeosFromContract = (contract: any) : Promise<[geo]> => {
-    return contract.storage().then((storage:any) => storage["token_metadata"].map((elt) => elt));
-    // storage["token_metadata"]
-}
-
-// const updateTemp = (tezos: TezosToolkit, contract: string) => {
-//     GetTempFromOpenMeteo(
-//         50.63297,
-//         3.05858
-//     )
-//     .then( (temp: number) => {console.log("got temp from openmeteo : "+temp); return loadContract(tezos, contract, temp)})
-//     .then(operation => {
-//         console.log("waiting for operation")
-//         return operation.confirmation(1)
-//     })
-//     .catch(err => {
-//         console.log("error");
-//         console.error(err)
-//     })
-// }
-
-const updateLoop = (tezos: TezosToolkit, contract: string, t: number) => {
+/**
+ * Updates the contract every blocks.
+ */
+const updateLoop = (tezos: TezosToolkit, contract: string, ms: number) => {
     const loop = (prevBlock: string) => {
         tezos.rpc.getBlock()
         .then((blockresponse) => {
             if (blockresponse.hash !== prevBlock) {
                 updateContract(tezos, contract)
             }
-            setTimeout(loop, t, blockresponse.hash)
+            setTimeout(loop, ms, blockresponse.hash)
         })
         .catch(console.error)
     }
-    loop("");
+    return loop("");
 }
 
+/**
+ * Starts the update loop with the appropriate variables
+ */
 const main = ()  => {
     const tezos = new TezosToolkit(config.get("tezosEndpoint"));
     const Signer = new InMemorySigner(config.get("signer"))
     tezos.setProvider({
         signer: Signer
     });
-    balance(tezos, Signer);
-
     updateLoop(tezos, config.get("contract"), config.get("blockTime"))
 }
-
-
 
 main()
