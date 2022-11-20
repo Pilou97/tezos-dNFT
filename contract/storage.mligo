@@ -23,7 +23,9 @@ type t = storage
 
 let empty () : storage =
     let metadata: (string, bytes) big_map = Big_map.empty 
-        |> Big_map.add "" 0x68747470733a2f2f63656c6c61722d63322e73657276696365732e636c657665722d636c6f75642e636f6d2f6d657461646174612f646e66742e6a736f6e
+        |> Big_map.add 
+            "" 
+            0x68747470733a2f2f63656c6c61722d63322e73657276696365732e636c657665722d636c6f75642e636f6d2f6d657461646174612f646e66742e6a736f6e
     in
     let ledger: ledger = Big_map.empty in
     let operators: operators = Big_map.empty in
@@ -59,7 +61,7 @@ let get_balance (holder: address) (token_id: token_id) (storage: storage) =
             then 1n
             else 0n
 
-let add_operator (operator: address) (owner: address) (token_id: token_id) (storage:storage) =
+let add_operator (operator: address) (owner: address) (token_id: token_id) (storage: storage) =
     let {metadata; ledger; operators; token_metadata; counter} = storage in
     let operators_set = Big_map.find_opt (owner, token_id) operators in
     let operators_set = match operators_set with
@@ -70,7 +72,7 @@ let add_operator (operator: address) (owner: address) (token_id: token_id) (stor
     let operators = Big_map.update (owner, token_id) (Some operators_set) operators in
     {metadata; ledger; operators; token_metadata; counter}
 
-let remove_operator (operator: address) (owner: address) (token_id: token_id) (storage:storage) = 
+let remove_operator (operator: address) (owner: address) (token_id: token_id) (storage: storage) = 
     let {metadata; ledger; operators; token_metadata; counter} = storage in
     let operators_set = Big_map.find_opt (owner, token_id) operators in
     let operators_set = match operators_set with
