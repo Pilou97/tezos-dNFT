@@ -164,7 +164,7 @@ let assert_token_defined (token_id: token_id) (storage: storage) =
     else failwith Error.fa2_token_undefined
 
 (**
-    Checks if the owner has enough balance compared  to the given amount.
+    Checks if the owner has enough balance compared to the given amount.
 *)
 let assert_sufficient_balance (amount: nat) (owner: address) (token_id: token_id) (storage: storage) =
     let balance = get_balance owner token_id storage in
@@ -173,7 +173,8 @@ let assert_sufficient_balance (amount: nat) (owner: address) (token_id: token_id
 
 (**
     Creates a new token in the ledger.
-    The token
+    The token won't have any metadata
+    The id of the counter will be the value of the field "counter" of the contract
 *)
 let mint (owner:address) (storage:storage) =
     let {metadata=contract_metadata; ledger; operators; token_metadata; counter=token_id} = storage in
@@ -187,11 +188,11 @@ let mint (owner:address) (storage:storage) =
     let counter = token_id + 1n in
     (token_id, {metadata=contract_metadata; ledger; operators; token_metadata; counter})
 
+(**
+    The only person allowed to udpate the metadata if the owner of the token.
+    If the address is not allowed to update the metadata of a contract the error FA2_NOT_OWNER will be raised
+*)
 let assert_can_update_metadata (address: address) (token_id: token_id) (storage: storage) =
     // TODO: duplicated code
     let is_owner = is_owner address token_id storage in
     if is_owner then () else failwith Error.fa2_not_owner
-
-let assert_exists (token_id: token_id) (storage: storage) =
-    if Big_map.mem token_id storage.token_metadata then ()
-    else failwith Error.fa2_token_undefined

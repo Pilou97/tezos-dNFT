@@ -83,7 +83,7 @@ module Update_operators = struct
 
     type t = update_operators
 
-    let transition (update_operators: update_operators) (storage: Storage.t): return = 
+    let transition (update_operators: update_operators) (storage: Storage.t): Storage.t = 
         let sender = Tezos.get_sender () in
         let update_operator (storage, operation) = match operation with
             | Add_operator {owner; operator; token_id} -> 
@@ -93,8 +93,12 @@ module Update_operators = struct
                 let () = if owner = sender then () else failwith Error.fa2_not_owner in  
                 Storage.remove_operator owner operator token_id storage
         in
-        let storage = List.fold_left update_operator storage update_operators in
-        ([], storage)
+        List.fold_left update_operator storage update_operators
+
+    let transition (update_operators: update_operators) (storage: Storage.t): return = 
+        let operations: operation list = [] in
+        let storage = transition update_operators storage in
+        operations, storage
 end
 
 module Update_metadata = struct
@@ -114,23 +118,20 @@ module Update_metadata = struct
     let update_token (storage, update_token: Storage.t * update_token): Storage.t = 
         // Some fields are reserved, so they can't be updated
         let {token_id; metadata} = update_token in
-        let () = Storage.assert_exists token_id storage in
+        let () = Storage.assert_token_defined token_id storage in
         let () = Storage.assert_can_update_metadata (Tezos.get_sender ()) token_id storage in
         if Map.mem "" metadata then failwith Error.fa2_reserved_metadata_field
         else if Map.mem "name" metadata then failwith Error.fa2_reserved_metadata_field
         else if Map.mem "symbol" metadata then failwith Error.fa2_reserved_metadata_field
         else if Map.mem "decimals" metadata then failwith Error.fa2_reserved_metadata_field
         else    
-
         // check if the token exists
         let token = Storage.get_token token_id storage in
         let token = match token with
             | None -> failwith Error.fa2_token_undefined
             | Some token -> token
         in
-
         let {token_id; token_info} = token in
-
         let update_one_field (acc, update) = 
             let (field, data) = update in
                 match data with
@@ -139,9 +140,7 @@ module Update_metadata = struct
             in
         let token_info = Map.fold update_one_field metadata token_info in
         let token = {token_id; token_info} in
-
-        let storage = Storage.update_token token_id token storage in
-        storage
+        Storage.update_token token_id token storage
 
     let transition (update_metadata: update_metadata) (storage: Storage.t): return = 
         let operations: operation list = [] in
@@ -153,11 +152,14 @@ module Mint_token = struct
     type mint = (string, bytes) map
     type t = mint
 
-    let transition (mint: mint) (storage: Storage.t): return = 
+    let mint_token (mint: mint) (storage: Storage.t): Storage.t = 
         let sender = Tezos.get_sender () in
-        let operations: operation list = [] in
         let token_id, storage = Storage.mint sender storage in
         let metadata = {token_id; token_info = mint} in
-        let storage = Storage.update_token token_id metadata storage in
+        Storage.update_token token_id metadata storage
+
+    let transition (mint: mint) (storage: Storage.t): return = 
+        let operations: operation list = [] in
+        let storage = mint_token mint storage in
         operations, storage
 end
