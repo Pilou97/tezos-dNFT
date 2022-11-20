@@ -19,4 +19,3 @@
     - initial storage to be compiled
     - fix flextesa version
     - add e2e tests when they exists
-    - only deploy on push on main

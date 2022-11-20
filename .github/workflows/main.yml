@@ -78,6 +78,7 @@ jobs:
         run: ./octez-client --endpoint http://localhost:20000 originate contract nft transferring 0 from alice running "`cat nft.tz`" --init "${{env.INITIAL_STORAGE}}" --burn-cap 1
 
   deploy-ghostnet:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs:
       - compile
