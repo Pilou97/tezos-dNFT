@@ -36,8 +36,7 @@ function cleanup_err() {
 
 function check_requirements {
     echo -n "Check requirements... "
-    docker-compose version > /dev/null
-    ligo --version > /dev/null
+    docker --version > /dev/null
     octez-client --version > /dev/null
     jq --version > /dev/null
     echo "OK"

@@ -25,13 +25,13 @@ jobs:
         run: ${{env.LIGO}} compile contract contract/main.mligo --protocol kathmandu --output-file nft.tz
 
       - name: Compile storage
-        run: ${{env.LIGO}} compile storage contract/main.mligo "Storage.empty ()"  --protocol kathmandu --output-file nft.tz
+        run: ${{env.LIGO}} compile storage contract/main.mligo "Storage.empty ()"  --protocol kathmandu --output-file storage.tz
 
       - name: Upload compiled artifact
         uses: actions/upload-artifact@v3
         with:
           name: compiled contract
-          paths: |
+          path: |
             ${{ github.workspace }}/nft.tz
             ${{ github.workspace }}/storage.tz
 
@@ -63,7 +63,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download a single artifact
+      - name: Download compiled contract
         uses: actions/download-artifact@v3
         with:
           name: compiled contract
@@ -93,6 +93,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install octez-client
+        run: |
+          wget https://github.com/serokell/tezos-packaging/releases/download/v15.0-1/octez-client
+          chmod +x octez-client
+          echo "$(pwd)" >> $GITHUB_PATH
+
+      - name: Add private key
+        run: ./octez-client import secret key alice unencrypted:edsk3QoqBuvdamxouPhin7swCvkQNgq4jP5KZPbwWNnwdZpSpJiEbq
+
+      - name: echo path
+        run: |
+          echo $PATH
+          which octez-client
 
       - name: Run the test
         run: ./tests/run-tests.sh
