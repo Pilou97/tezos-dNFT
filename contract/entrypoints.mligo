@@ -21,20 +21,17 @@ module Transfer = struct
     type t = transfer
 
     let transfer_from  (storage, {from_; txs}) =
-        let {metadata; ledger; operators; token_metadata; counter } = storage in
         let sender = Tezos.get_sender () in
-        let transfer_one_token (ledger, tx: Storage.ledger * token_transfer)=
-            let _ = ledger in
+        let transfer_one_token (storage, tx: Storage.t * token_transfer)=
             let {to_; token_id; amount} = tx in
             let () = Storage.assert_token_defined token_id storage in
             let () = Storage.assert_can_transfer_token sender from_ token_id storage in
             let () = Storage.assert_sufficient_balance amount from_ token_id storage in
             let () = if amount > 1n then failwith Error.fa2_insufficient_balance else () in
-            if amount = 0n then ledger 
-            else Storage.transfer from_ to_ token_id ledger
+            if amount = 0n then storage 
+            else Storage.transfer from_ to_ token_id storage
         in
-        let ledger = List.fold_left transfer_one_token ledger txs in
-        {metadata; ledger; operators; token_metadata; counter}
+        List.fold_left transfer_one_token storage txs
 
     let transition (transfer: transfer) (storage: Storage.t): return = 
         let storage = List.fold_left transfer_from storage transfer in
