@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: compile
     env:
-      INITIAL_STORAGE: (Pair (Pair 0 {}) {} {})
+      INITIAL_STORAGE: (Pair (Pair (Pair 0 {}){ Elt "" 0x68747470733a2f2f63656c6c61722d63322e73657276696365732e636c657665722d636c6f75642e636f6d2f6d657461646174612f646e66742e6a736f6e } {}) {})
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -102,5 +102,5 @@ jobs:
 
       - name: Originate contract
         env:
-          INITIAL_STORAGE: "(Pair (Pair 0 {}) {} {})"
+          INITIAL_STORAGE: (Pair (Pair (Pair 0 {}){ Elt "" 0x68747470733a2f2f63656c6c61722d63322e73657276696365732e636c657665722d636c6f75642e636f6d2f6d657461646174612f646e66742e6a736f6e } {}) {})
         run: ./octez-client --endpoint ${{ env.ENDPOINT }} originate contract nft transferring 0 from ghostnet-user running "`cat nft.tz`" --init "${{ env.INITIAL_STORAGE }}" --burn-cap 1

@@ -5,14 +5,14 @@
 #import "../error.mligo" "Error"
 
 let update_operators_owner_can_udpate () = 
-    let _, token_id, prev = Common.Storage.with_token Storage.empty in
+    let _, token_id, prev = Common.Storage.with_token (Storage.empty ()) in
     let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata=Map.empty} in
     let update_metadata = Update_metadata [update_token] in
     let _, result = Common.transfer prev update_metadata in
     Common.assert_success result
 
 let update_operators_only_owner_can_update () = 
-    let _, token_id, prev = Common.Storage.with_token Storage.empty in
+    let _, token_id, prev = Common.Storage.with_token (Storage.empty ()) in
     let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata=Map.empty} in
     let update_metadata = Update_metadata [update_token] in
     let () = Common.with_bob () in
@@ -23,7 +23,7 @@ let cannot_update_reserved_field field =
     let bytes = Bytes.pack 0 in
     let update : Entrypoints.Update_metadata.update = (Update bytes) in
     let metadata = Map.empty |> Map.add field update in
-    let _, token_id, prev = Common.Storage.with_token Storage.empty in
+    let _, token_id, prev = Common.Storage.with_token (Storage.empty ()) in
     let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata} in
     let update_metadata = Update_metadata [update_token] in
     let _, result = Common.transfer prev update_metadata in
@@ -42,7 +42,7 @@ let add_new_field () =
     let one = Bytes.pack 0 in
     let update : Entrypoints.Update_metadata.update = (Update one) in
     let metadata = Map.empty |> Map.add field update in
-    let _, token_id, prev = Common.Storage.with_token Storage.empty in
+    let _, token_id, prev = Common.Storage.with_token (Storage.empty ()) in
     let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata} in
     let update_metadata = Update_metadata [update_token] in
     let storage, result = Common.transfer prev update_metadata in
@@ -61,7 +61,7 @@ let update_existing_field () =
 
     let update : Entrypoints.Update_metadata.update = (Update one) in
     let metadata = Map.empty |> Map.add field update in
-    let _, token_id, prev = Common.Storage.with_token Storage.empty in
+    let _, token_id, prev = Common.Storage.with_token (Storage.empty ()) in
     let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata} in
     let update_metadata = Update_metadata [update_token] in
     let prev, _ = Common.transfer prev update_metadata in
@@ -85,7 +85,7 @@ let update_existing_field () =
 let remove_field () = 
     let field = "to-remove" in
     let update : Entrypoints.Update_metadata.update = Remove in
-    let _, token_id, prev = Common.Storage.with_token Storage.empty in
+    let _, token_id, prev = Common.Storage.with_token (Storage.empty ()) in
     let metadata = Map.empty |> Map.add field update in
     let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata} in
     let update_metadata = Update_metadata [update_token] in
@@ -97,7 +97,7 @@ let remove_existing_field () =
     let one = Bytes.pack 0 in
     let update : Entrypoints.Update_metadata.update = (Update one) in
     let metadata = Map.empty |> Map.add field update in
-    let _, token_id, prev = Common.Storage.with_token Storage.empty in
+    let _, token_id, prev = Common.Storage.with_token (Storage.empty ()) in
     let update_token: Entrypoints.Update_metadata.update_token = {token_id; metadata} in
     let update_metadata = Update_metadata [update_token] in
     let prev, _ = Common.transfer prev update_metadata in
@@ -123,7 +123,7 @@ let cannot_update_undefined_token () =
     let metadata = Map.empty |> Map.add field update in
     let update_token: Entrypoints.Update_metadata.update_token = {token_id=5n; metadata} in
     let update_metadata = Update_metadata [update_token] in
-    let _, result = Common.transfer Storage.empty update_metadata in
+    let _, result = Common.transfer (Storage.empty ()) update_metadata in
     Common.assert_failwith result Error.fa2_token_undefined
 
 let test =

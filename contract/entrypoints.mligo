@@ -21,7 +21,7 @@ module Transfer = struct
     type t = transfer
 
     let transfer_from  (storage, {from_; txs}) =
-        let {ledger; operators; token_metadata; counter } = storage in
+        let {metadata; ledger; operators; token_metadata; counter } = storage in
         let sender = Tezos.get_sender () in
         let transfer_one_token (ledger, tx: Storage.ledger * token_transfer)=
             let _ = ledger in
@@ -34,7 +34,7 @@ module Transfer = struct
             else Storage.transfer from_ to_ token_id ledger
         in
         let ledger = List.fold_left transfer_one_token ledger txs in
-        {ledger; operators; token_metadata; counter}
+        {metadata; ledger; operators; token_metadata; counter}
 
     let transition (transfer: transfer) (storage: Storage.t): return = 
         let storage = List.fold_left transfer_from storage transfer in
@@ -87,7 +87,7 @@ module Update_operators = struct
     type t = update_operators
 
     let transition (update_operators: update_operators) (storage: Storage.t): return = 
-        let {ledger; operators; token_metadata; counter} = storage in
+        let {metadata; ledger; operators; token_metadata; counter} = storage in
         let sender = Tezos.get_sender () in
         let update_operator (operators, operation) = match operation with
             | Add_operator {owner; operator; token_id} -> 
@@ -98,7 +98,7 @@ module Update_operators = struct
                 Storage.remove_operator owner operator token_id operators
         in
         let operators = List.fold_left update_operator operators update_operators in
-        let storage = {ledger; operators; token_metadata; counter} in
+        let storage = {metadata; ledger; operators; token_metadata; counter} in
         ([], storage)
 end
 

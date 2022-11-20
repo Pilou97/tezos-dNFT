@@ -11,8 +11,7 @@
 
 - contract:
     - clean the code
-    - end to end tests
-    - Add metadata to NFT contract (TZIP-16)
+    - end to end tests 
     - unit tests:
         - update_operators
         - balance_of
