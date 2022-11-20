@@ -10,7 +10,6 @@
     - get the block time from the rpc
 
 - contract:
-    - clean the code
     - end to end tests 
     - add a way to protect fields
     - add a meta operator which can update the metadata of a token
