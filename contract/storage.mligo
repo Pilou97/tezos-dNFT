@@ -89,6 +89,12 @@ let is_operator (operator: address) (owner: address) (token_id: nat) (operators:
         | None -> false
         | Some operators -> Set.mem operator operators
 
+let is_owner (address: address) (token_id: nat) (storage: t) =
+    let {metadata=_; ledger; operators=_; token_metadata=_; counter=_} = storage in
+    match Big_map.find_opt token_id ledger with
+        | None -> failwith Error.fa2_token_undefined
+        | Some owner -> address = owner 
+
 let get_token (token_id: nat) (storage: t) = Big_map.find_opt token_id storage.token_metadata
 
 let update_token (token_id: nat) (metadata: metadata) (storage: t) = 
@@ -97,12 +103,7 @@ let update_token (token_id: nat) (metadata: metadata) (storage: t) =
     {metadata=contract_metadata; ledger; operators; token_metadata; counter}
 
 let assert_can_transfer_token (address: address) (owner: address) (token_id: nat) (storage: t) = 
-    let {metadata=_; ledger; operators=_; token_metadata=_; counter=_} = storage in
-    let is_owner: bool = 
-        match Big_map.find_opt token_id ledger with
-            | None -> failwith Error.fa2_token_undefined
-            | Some owner -> address = owner 
-    in
+    let is_owner = is_owner address token_id storage in 
     let operators = get_operators owner token_id storage in
     let is_operator = Set.mem address operators in
     if is_operator || is_owner then ()
@@ -133,11 +134,7 @@ let mint (owner:address) (storage:t) =
 
 let assert_can_update_metadata (address: address) (token_id: nat) (storage: t) =
     // TODO: duplicated code
-    let is_owner: bool = 
-        match Big_map.find_opt token_id storage.ledger with
-            | None -> false
-            | Some owner -> address = owner 
-    in
+    let is_owner = is_owner address token_id storage in
     if is_owner then () else failwith Error.fa2_not_owner
 
 let assert_exists (token_id: nat) (storage: t) =
