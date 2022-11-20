@@ -1,8 +1,5 @@
 # Roadmap
 
-- docusaurus:
-    - interactive documentation
-
 - off-chain: weather example
     - clean the code
     - tests e2e :
@@ -14,7 +11,7 @@
 
 - contract:
     - clean the code
-    - end to end tests 
+    - end to end tests
     - Add metadata to NFT contract (TZIP-16)
     - unit tests:
         - update_operators
@@ -33,4 +30,4 @@
 
 - on-chain: example
    - need to find a good example
-   - readme 
+   - readme
