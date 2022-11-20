@@ -16,5 +16,4 @@
 
 - CI/CD:
     - get easily the contract address
-    - initial storage to be compiled
     - add e2e tests when they exists
