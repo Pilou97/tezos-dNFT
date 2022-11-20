@@ -1,3 +1,5 @@
+#!/usr/bin/bash
+
 if [[ -z $1 ]]; then
     PORT=20000
 else
