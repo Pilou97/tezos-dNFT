@@ -7,7 +7,6 @@
             - start the server and check
             - mint a new token
             - check a few moments later that temperature is set
-    - get the block time from the rpc => env var
 
 - contract:
     - end to end tests 
@@ -15,5 +14,4 @@
     - add a meta operator which can update the metadata of a token
 
 - CI/CD:
-    - get easily the contract address
     - add e2e tests when they exists
